@@ -10,6 +10,7 @@ trap 'echo "ERROR: line no = $LINENO, exit status = $?" >&2; exit 1' ERR
 cd ./terraform
 terraform plan
 terraform apply
+echo ""
 
 # masterIPアドレスをhosts,varsに転記
 cp -f ../ansible/hosts.org ../ansible/hosts
