@@ -8,5 +8,5 @@ services:
     privileged: true                           
     command: /sbin/init  
     volumes:
-      - ./tools:/home/testuser
+      - ../tools:/home/testuser
     working_dir: /home/testuser
