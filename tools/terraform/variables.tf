@@ -1,0 +1,11 @@
+variable "region" {}
+variable "vpc_cidr" {}
+variable "subnet_availability_zone" {}
+variable "subnet_cidr_block" {}
+variable "ssh_to_master" {}
+variable "kubeapi_to_master" {}
+variable "ssh_to_worker" {}
+variable "nodeport_to_worker" {}
+variable "worker_count" {}
+variable "pubkey_path" {}
+variable "instance_ami" {}

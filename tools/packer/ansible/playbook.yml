@@ -1,0 +1,132 @@
+---
+- hosts: all
+  become: yes
+  gather_facts: no
+  tasks:
+
+#######################
+# linux-configuration #
+#######################
+
+    - name: set timezone to Asia/Tokyo
+      timezone:
+        name: Asia/Tokyo
+
+    - name: yum Upgrade all packages
+      yum:
+        name: '*'
+        state: latest
+
+    - name: Disable SELinux
+      selinux:
+        state: disabled
+
+    - name: enable br_netfilter
+      command: modprobe br_netfilter
+
+    - name: ensure net.bridge.bridge-nf-call-iptables is set to 1
+      sysctl:
+        name: net.bridge.bridge-nf-call-iptables
+        value: 1
+        state: present
+
+    - name: ensure net.bridge.bridge-nf-call-ip6tables is set to 1
+      sysctl:
+        name: net.bridge.bridge-nf-call-ip6tables
+        value: 1
+        state: present
+
+    - name: disable swap
+      command: swapoff -a
+
+#############################
+# container runtime install #
+#############################
+
+    - name: install packages
+      yum:
+        name: "{{ packages }}"
+        state: present
+      vars:
+        packages:
+          - device-mapper-persistent-data
+          - lvm2
+
+    - name: add docker repo
+      get_url:
+        url: https://download.docker.com/linux/centos/docker-ce.repo
+        dest: /etc/yum.repos.d/docker-ce.repo
+        mode: 0644
+
+    - name: install docker-tools
+      yum:
+        name: "{{ packages }}"
+      vars:
+        packages:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+
+    - name: Create a /etc/docker if it does not exist
+      ansible.builtin.file:
+        path: /etc/docker
+        state: directory
+        mode: '0755'
+
+    - name: Create a /etc/docker/daemon.json if it does not exist
+      ansible.builtin.file:
+        path: /etc/docker/daemon.json
+        state: touch
+        mode: '0644'
+
+    - name: Create docker-daemon setup file
+      blockinfile:
+        path: /etc/docker/daemon.json
+        marker: ""
+        block: |
+          {
+            "exec-opts": ["native.cgroupdriver=systemd"],
+            "log-driver": "json-file",
+            "log-opts": {
+              "max-size": "100m"
+            },
+            "storage-driver": "overlay2",
+            "storage-opts": [
+              "overlay2.override_kernel_check=true"
+            ]
+          }
+
+    - name: start docker
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+###############################
+# kubeadm and kubelet install #
+###############################
+
+    - name: add kubernetes repo
+      yum_repository:
+        name: kubernetes
+        description: kubernetes repo
+        baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+        gpgcheck: yes
+        enabled: yes
+        repo_gpgcheck: yes
+        gpgkey: https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+
+    - name: install kubelet kubeadm
+      yum:
+        name: "{{ packages }}"
+        state: present
+      vars:
+        packages:
+          - kubelet
+          - kubeadm
+
+    - name: start kubelet
+      systemd:
+        name: kubelet
+        state: started
+        enabled: yes

@@ -1,0 +1,13 @@
+### host
+[master]
+
+[worker]
+
+### host vars
+[master:vars]
+ansible_user=centos
+ansible_ssh_private_key_file=../terraform/sshkey/kube_sshkey
+
+[worker:vars]
+ansible_user=centos
+ansible_ssh_private_key_file=../terraform/sshkey/kube_sshkey

@@ -1,0 +1,13 @@
+---
+- hosts: worker
+  become: yes
+  gather_facts: no
+  vars_files: ./vars/vars.yaml 
+  tasks:
+
+#############################
+# worker join in kubernetes #
+#############################
+
+    - name: kubeadm join
+      shell: kubeadm join 10.0.1.100:6443 --token {{ token }} --discovery-token-ca-cert-hash sha256:{{ hash }}

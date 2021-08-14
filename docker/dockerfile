@@ -1,0 +1,21 @@
+FROM centos:centos7
+RUN yum -y update \
+ && yum -y install yum-utils \
+ && yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo \
+ && yum -y install epel-release \
+ && yum -y install packer \
+                   terraform \
+                   jq \
+                   ansible \
+                   openssh \
+                   less \
+                   tree \
+ && curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl" \
+ && chmod +x ./kubectl \
+ && mv ./kubectl /usr/local/bin/kubectl \
+ && rm -rf /var/cache/yum/* \
+ && yum clean all \
+ && ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime \
+ && rm -f /usr/sbin/packer \
+ && useradd -m testuser
+USER testuser

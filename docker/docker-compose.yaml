@@ -1,0 +1,12 @@
+version: '3.9'
+services:
+  kube_centos7:
+    container_name: kube_centos7
+    build:
+      context: .
+    image: kube_centos:7
+    privileged: true                           
+    command: /sbin/init  
+    volumes:
+      - ./tools:/home/testuser
+    working_dir: /home/testuser

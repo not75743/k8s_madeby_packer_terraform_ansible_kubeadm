@@ -1,0 +1,67 @@
+---
+- hosts: master
+  become: yes
+  gather_facts: no
+  vars_files: ./vars/vars.yaml 
+  tasks:
+
+################
+# kubeadm init #
+################
+
+    - name: kubeadm init
+      shell: kubeadm init --apiserver-cert-extra-sans={{ masterip }}
+
+    - name: get token
+      shell: kubeadm token list | awk 'NR==2{print $1}'
+      register: token
+
+    - name: replace worker var "token"
+      lineinfile:
+        path: ./vars/vars.yaml
+        regexp: "^token:"
+        line: "token: {{ token.stdout }} "
+        state: present
+      delegate_to: localhost
+      become: no
+
+    - name: get discovery-token-ca-cert-hash
+      shell: openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //' 
+      register: hash
+
+    - name: replace worker var "hash"
+      lineinfile:
+        path: ./vars/vars.yaml
+        regexp: "^hash:"
+        line: "hash: {{ hash.stdout }} "
+        state: present
+      delegate_to: localhost
+      become: no
+
+#######################
+# kubeconfig to local #
+#######################
+
+    - name: copy /etc/kubernetes/admin.conf to local
+      fetch:
+        src: /etc/kubernetes/admin.conf
+        dest: ../kubernetes_yaml/kubeconfig
+        flat: yes
+
+    - name: replace kubeconfig ipaddr
+      lineinfile:
+        path: ../kubernetes_yaml/kubeconfig
+        regexp: "^    server:"
+        line: "    server: https://{{ masterip }}:6443 "
+      delegate_to: localhost
+      become: no
+      tags: ipaddr
+
+#################################
+# setting calico cni to cluster #
+#################################
+
+    - name: apply calico to cluster
+      shell: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml --kubeconfig ../kubernetes_yaml/kubeconfig
+      delegate_to: localhost
+      become: no
