@@ -7,5 +7,6 @@ variable "kubeapi_to_master" {}
 variable "ssh_to_worker" {}
 variable "nodeport_to_worker" {}
 variable "worker_count" {}
+variable "instance_type" {}
 variable "pubkey_path" {}
 variable "instance_ami" {}

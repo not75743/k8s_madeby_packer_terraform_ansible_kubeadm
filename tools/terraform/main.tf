@@ -199,9 +199,9 @@ resource "aws_instance" "master" {
 
 # make worker ec2
 resource "aws_instance" "worker" {
-  count                       = var.worker_count
+  count                       = (var.worker_count == 0 ? 1 : (var.worker_count < 4 ? var.worker_count : 3))
   ami                         = var.instance_ami
-  instance_type               = "t2.medium"
+  instance_type               = var.instance_type
   key_name                    = aws_key_pair.kube_sshkey.id
   subnet_id                   = aws_subnet.kube_subnet.id
   private_ip                  = format("10.0.1.10%g", count.index + 1)
