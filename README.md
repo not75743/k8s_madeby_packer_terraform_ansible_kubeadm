@@ -1,6 +1,6 @@
 # k8s_madeby_packer_terraform_ansible_kubeadm
-packer,terraform,ansibleを使用し、AWS上にk8sクラスタを作ります。
-変数をいくつか埋めていけばクラスタを作成できるように作りました。
+packer,terraform,ansibleを使用し、AWS上にk8sクラスタを作ります。  
+変数をいくつか埋めていけばクラスタを作成できるように作りました。  
 また、各種ツールを備えるdockerfileも作成済みであるため、ツールをインストールすることなく実施可能です。（要docker,podman）
 
 # こんなものが出来上がる
@@ -76,7 +76,8 @@ docker-compose run kube_centos7 /bin/bash
 
 ## ② packer事前準備
 ### ②-1 packer/variables.pkrvars.hcl確認
-packerは上記の変数ファイルを使用します。デフォルト設定で使用可能ですが、もし変更がある場合は以下に従って修正してください。
+packerは上記の変数ファイルを使用します。  
+デフォルト設定で使用可能ですが、もし変更がある場合は以下に従って修正してください。
 
 | 変数           | 用途                                  | デフォルト              | 必須/任意 |
 | -------------- | ------------------------------------- | ----------------------- | --------- |
@@ -114,7 +115,8 @@ ap-northeast-1: ami-xxxxxxxxxxxxxxx # これ
 
 ## ④ terraform事前準備
 ### ④-1 SSH鍵用意
-各ノードへのansible,SSHに必要な鍵を用意します。既存の鍵を用意する場合 は不要です。
+各ノードへのansible,SSHに必要な鍵を用意します。  
+既存の鍵を用意する場合 は不要です。
 ```sh
 # 鍵格納ディレクトリに移動、鍵生成
 cd ../terraform
@@ -123,7 +125,7 @@ cd sshkey
 ssh-keygen -t rsa -b 4096 -N "" -f kube_sshkey
 ```
 ### ④-2 terraform/terraform.tfvars編集
-terraformは上記の変数ファイルを使用します。
+terraformは上記の変数ファイルを使用します。  
 入力必須箇所があるため、以下に従って必ず編集してください。
 
 | 変数                      | 用途                                                                                                               | デフォルト                | 必須/任意 |
@@ -160,7 +162,7 @@ cd ~
 ./kubernetes_setup.sh
 ```
 最初にterraform applyが実行されるので、出力内容に問題がなければ`yes`をタイプして先に進んでください。
-後は待つだけです。
+後は待つだけです。  
 やっていることはざっくり以下です。
 
 1. terraform実行(途中で一度実行して問題ないか聞かれます)
@@ -236,7 +238,7 @@ exit
 docker-compose down
 ```
 
-片付きました。
+片付きました。  
 再度クラスタを作る際は、コンテナの用意、環境変数でのcredential設定を行ってください。その後手順⑤から再度クラスタを作成できます。
 
 # 想定されるエラー
