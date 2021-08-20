@@ -5,7 +5,7 @@ packer,terraform,ansibleを使用し、AWS上にk8sクラスタを作ります�
 
 # こんなものが出来上がる
 - master *1 worker *(1~3) のk8sクラスタ
-```bash
+```Shell
 # 例
 NAME                                            STATUS   ROLES                  AGE   VERSION
 ip-10-0-1-100.ap-northeast-1.compute.internal   Ready    control-plane,master   15m   v1.22.1
@@ -59,7 +59,7 @@ k8sクラスタのバージョンは以下の通り(2021/8/20時点)
 
 # 手順
 ## ① 環境準備
-```bash
+```Shell
 # 作業ディレクトリを作り、そこに本gitリポジトリを持ってくる
 mkdir testdir
 cd testdir
@@ -68,7 +68,7 @@ git clone https://github.com/not75743/k8s_madeby_packer_terraform_ansible_kubead
 # イメージビルド後、コンテナ内に入る
 cd k8s_madeby_packer_terraform_ansible_kubeadm/docker
 docker-compose up -d --build
-docker-compose run kube_centos7 /bin/bash
+docker-compose run kube_centos7 /bin/Shell
 ```
 
 ツールが用意できている場合git clone以外不要です。
@@ -86,7 +86,7 @@ packerは上記の変数ファイルを使用します。デフォルト設定�
 | ami_prefix     | AMIのNAMEとTAGに使用                  | "kubenode"              | 任意      | 
 ### ②-2 環境変数設定
 packer,terraformがAWSリソースを操作可能にするため、環境変数でcredentialを設定します
-```bash
+```Shell
 export AWS_ACCESS_KEY_ID="xxxxxxxxxxxxxxxxxx"
 export AWS_SECRET_ACCESS_KEY="xxxxxxxxxxxxxxxxxxx"
 ```
@@ -94,7 +94,7 @@ export AWS_SECRET_ACCESS_KEY="xxxxxxxxxxxxxxxxxxx"
 
 ## ③packer実行
 以下を実行します
-```bash
+```Shell
 # 移動(packerコマンドはカレントディレクトリを参照するため)
 cd packer
 
@@ -106,7 +106,7 @@ packer build -var-file=variables.pkrvars.hcl .
 ```
 無事完了したら以下のように出力されます。  
 terraformの変数ファイルで使うため、生成されたAMI IDを控えて下さい。  
-```bash
+```Shell
 --> amazon-ebs.centos: AMIs were created:
 ap-northeast-1: ami-xxxxxxxxxxxxxxx # これ
 ```
@@ -114,7 +114,7 @@ ap-northeast-1: ami-xxxxxxxxxxxxxxx # これ
 ## ④ terraform事前準備
 ### ④-1 SSH鍵用意
 各ノードへのansible,SSHに必要な鍵を用意します。既存の鍵を用意する場合は不要です。
-```bash
+```Shell
 # 鍵格納ディレクトリに移動、鍵生成
 cd ../terraform
 mkdir sshkey && chmod 700 sshkey
@@ -141,20 +141,20 @@ terraformは上記の変数ファイルを使用します。
 | instance_ami              | packerで用意したAMIのID                                                                                            | "ami-xxxxxxxxxx"           | 必須      |
 
 ※ 複数IPを対象にする場合、以下の様に記載してください。
-```bash
+```Shell
 ["192.0.2.1/32", "192.0.2.2/32"]
 ```
 
 ### ④-3 terraform init
 terraformのプラグインをインストールします。terraformディレクトリに移動してください
-```bash
+```Shell
 cd terraform
 terraform init
 ```
 
 ## ⑤ shell実行
 用意してあるシェルスクリプトを実行します。
-```bash
+```Shell
 cd ~
 ./kubernetes_setup.sh
 ```
@@ -170,7 +170,7 @@ cd ~
 6. k8s接続用コマンドを出力
 
 終わったら以下の様に出力されます
-```bash
+```Shell
 done !!
 
 Run "export KUBECONFIG=`realpath ./kubernetes_yaml/kubeconfig`" to connect kubernetes API
@@ -178,12 +178,12 @@ Run "export KUBECONFIG=`realpath ./kubernetes_yaml/kubeconfig`" to connect kuber
 
 ## ⑥ kubernetes接続
 shellscript終了時に指示された内容を入力します。
-```bash
+```Shell
 export KUBECONFIG=`realpath ./kubernetes_yaml/kubeconfig`
 ```
 k8sクラスタに接続できるようになりました。  
 本環境(worker2台)では以下の様に出力されました。
-```bash
+```Shell
 $ kubectl get node
 NAME                                            STATUS   ROLES                  AGE    VERSION
 ip-10-0-1-100.ap-northeast-1.compute.internal   Ready    control-plane,master   2m6s   v1.22.0
@@ -209,13 +209,13 @@ kube-system   kube-scheduler-ip-10-0-1-100.ap-northeast-1.compute.internal      
 
 ## ⑦動作確認
 おいてあるファイルで動作確認が可能です。
-```bash
+```Shell
 cd kubernetes_yaml
 kubectl apply -f sample.yaml
 ```
 接続確認してつなげるか試してください。  
 workerの接続情報が書かれたworkerip.txtがあるので使います。
-```bash
+```Shell
 $ cat workerip.txt
 $ curl http://<workerip>:30080 && echo
 Hello Kubernetes!
@@ -224,13 +224,13 @@ Hello Kubernetes!
 ## ⑧ 片付け
 以下を実行してください。
 terraformで作成したリソースが削除されます。
-```bash
+```Shell
 cd ~
 ./kubernetes_destroy.sh
 ```
 途中で消していいか聞かれるため、問題なければ`yes`をタイプしてください。  
 コンテナを使用している場合は、使わないのであれば忘れずに消して置きましょう
-```bash
+```Shell
 exit
 docker-compose down
 ```
