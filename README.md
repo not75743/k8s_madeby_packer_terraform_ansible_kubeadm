@@ -12,6 +12,8 @@ ip-10-0-1-100.ap-northeast-1.compute.internal   Ready    control-plane,master   
 ip-10-0-1-101.ap-northeast-1.compute.internal   Ready    <none>                 15m   v1.22.1
 ip-10-0-1-102.ap-northeast-1.compute.internal   Ready    <none>                 15m   v1.22.1
 ```
+![EC2_kubernetes](https://user-images.githubusercontent.com/64761395/130348673-56ba5092-b2ae-47ed-b079-b0eaeb95bed4.png)
+
 - CNIプラグイン(calico)適用済み
 - 操作PCよりkubectlで設定適用可能
 
